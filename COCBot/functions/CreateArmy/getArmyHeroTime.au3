@@ -53,6 +53,7 @@ Func getArmyHeroTime($iHeroType, $bOpenArmyWindow = False, $bCloseArmyWindow = F
 
 		; Check if slot has healing hero
 		$sResult = ArmyHeroStatus($index) ; OCR slot for status information
+		If $g_iDebugSetlogTrain = 1 Or $g_iDebugSetlog = 1 Then Setlog("ArmyHeroStatus[" & $index & "]: " & $sResult, $COLOR_DEBUG)
 		If $sResult <> "" Then ; we found something
 			If StringInStr($sResult, "heal", $STR_NOCASESENSEBASIC) = 0 Then
 				If $g_iDebugSetlogTrain = 1 Or $g_iDebugSetlog = 1 Then
@@ -70,7 +71,7 @@ Func getArmyHeroTime($iHeroType, $bOpenArmyWindow = False, $bCloseArmyWindow = F
 
 		If $sResult <> "" Then
 
-			$aResultHeroes[$index] = ConvertOCRTime($aHeroRemainData[$index][2] & " recover" , $sResult, True) ; update global array
+			$aResultHeroes[$index] = ConvertOCRTime($aHeroRemainData[$index][2] & " recover", $sResult, True) ; update global array
 			If $g_iDebugSetlogTrain = 1 Or $g_iDebugSetlog = 1 Then SetLog("Remaining " & $aHeroRemainData[$index][2] & " recover time: " & StringFormat("%.2f", $aResultHeroes[$index]), $COLOR_DEBUG)
 
 			If $iHeroType = $aHeroRemainData[$index][3] Then ; if only one hero requested, then set return value and exit loop

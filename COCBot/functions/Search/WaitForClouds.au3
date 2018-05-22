@@ -234,23 +234,30 @@ Func chkAttackSearchPersonalBreak()
 EndFunc   ;==>chkAttackSearchPersonalBreak
 
 Func btnSearchFailRetry()
-	; verify retry button exists, and press button, return false if button not found
-	Local $offColors[3][3] = [[0x000000, 50, 8], [0x60B014, 55, 21], [0x020201, 90, 7]] ; 2nd=Black in "R", 3rd=green centered under text, 4th=black in v of letter "Y"
-	Local $ButtonPixel = _MultiPixelSearch(364, 405 + $g_iMidOffsetY, 466, 430 + $g_iMidOffsetY, 1, 1, Hex(0x000000, 6), $offColors, 20) ; first vertical black pixel of Retry button edge
-	If $g_iDebugSetlog = 1 Then Setlog("Retry btn clr chk-#1: " & _GetPixelColor(368, 347 + $g_iMidOffsetY, True) & ", #2: " & _
-		_GetPixelColor(368 + 50, 347 + 8 + $g_iMidOffsetY, True) & ", #3: " & _GetPixelColor(368 + 55, 347 + 21 + $g_iMidOffsetY, True) & ", #4: " & _
-		_GetPixelColor(368 + 90, 347 + 7 + $g_iMidOffsetY, True), $COLOR_DEBUG)
-	If IsArray($ButtonPixel) Then
-		If $g_iDebugSetlog = 1 Then
-			Setlog("ButtonPixel = " & $ButtonPixel[0] & ", " & $ButtonPixel[1], $COLOR_DEBUG) ;Debug
-			Setlog("Retry Btn Pixel color found #1: " & _GetPixelColor($ButtonPixel[0], $ButtonPixel[1], True) & ", #2: " & _GetPixelColor($ButtonPixel[0] + 144, _
-				$ButtonPixel[1], True) & ", #3: " & _GetPixelColor($ButtonPixel[0] + 54, $ButtonPixel[1] + 17, True) & ", #4: " & _GetPixelColor($ButtonPixel[0] + 54, _
-				$ButtonPixel[1] + 27, True), $COLOR_DEBUG)
-		EndIf
-		Click($ButtonPixel[0] + 75, $ButtonPixel[1] + 25, 1, 0, "#0512") ; Click Retry Button
+
+	If QuickMIS("BC1", @ScriptDir & "\imgxml\Clouds\", 270, 400, 600, 500) Then
+		Click($g_iQuickMISX + 270, $g_iQuickMISY + 400, 1, 0, "#0512")
 		Return True
 	EndIf
 	Return False
+
+;~ 	; verify retry button exists, and press button, return false if button not found
+;~ 	Local $offColors[3][3] = [[0x000000, 50, 8], [0x60B014, 55, 21], [0x020201, 90, 7]] ; 2nd=Black in "R", 3rd=green centered under text, 4th=black in v of letter "Y"
+;~ 	Local $ButtonPixel = _MultiPixelSearch(364, 405 + $g_iMidOffsetY, 466, 430 + $g_iMidOffsetY, 1, 1, Hex(0x000000, 6), $offColors, 20) ; first vertical black pixel of Retry button edge
+;~ 	If $g_iDebugSetlog = 1 Then Setlog("Retry btn clr chk-#1: " & _GetPixelColor(368, 347 + $g_iMidOffsetY, True) & ", #2: " & _
+;~ 			_GetPixelColor(368 + 50, 347 + 8 + $g_iMidOffsetY, True) & ", #3: " & _GetPixelColor(368 + 55, 347 + 21 + $g_iMidOffsetY, True) & ", #4: " & _
+;~ 			_GetPixelColor(368 + 90, 347 + 7 + $g_iMidOffsetY, True), $COLOR_DEBUG)
+;~ 	If IsArray($ButtonPixel) Then
+;~ 		If $g_iDebugSetlog = 1 Then
+;~ 			Setlog("ButtonPixel = " & $ButtonPixel[0] & ", " & $ButtonPixel[1], $COLOR_DEBUG) ;Debug
+;~ 			Setlog("Retry Btn Pixel color found #1: " & _GetPixelColor($ButtonPixel[0], $ButtonPixel[1], True) & ", #2: " & _GetPixelColor($ButtonPixel[0] + 144, _
+;~ 					$ButtonPixel[1], True) & ", #3: " & _GetPixelColor($ButtonPixel[0] + 54, $ButtonPixel[1] + 17, True) & ", #4: " & _GetPixelColor($ButtonPixel[0] + 54, _
+;~ 					$ButtonPixel[1] + 27, True), $COLOR_DEBUG)
+;~ 		EndIf
+;~ 		Click($ButtonPixel[0] + 75, $ButtonPixel[1] + 25, 1, 0, "#0512") ; Click Retry Button
+;~ 		Return True
+;~ 	EndIf
+;~ 	Return False
 EndFunc   ;==>btnSearchFailRetry
 
 Func chkSurrenderBtn()

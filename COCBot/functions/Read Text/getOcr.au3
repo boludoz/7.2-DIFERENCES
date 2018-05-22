@@ -57,7 +57,7 @@ Func getResourcesMainScreen($x_start, $y_start) ; -> Gets complete value of Gold
 EndFunc   ;==>getResourcesMainScreen
 
 Func getResourcesLoot($x_start, $y_start) ; -> Gets complete value of Gold/Elixir after attack xxx,xxx "AttackReport"
-	Return getOcrAndCapture("coc-loot", $x_start, $y_start, 107, 22, True)
+	Return getOcrAndCapture("coc-loot", $x_start, $y_start, 160, 22, True)
 EndFunc   ;==>getResourcesLoot
 
 Func getResourcesLootDE($x_start, $y_start) ; -> Gets complete value of Dark Elixir after attack xxx,xxx "AttackReport"
@@ -97,7 +97,12 @@ Func getHeroUpgradeTime($x_start, $y_start) ; -> Gets complete upgrade time for 
 EndFunc   ;==>getHeroUpgradeTime
 
 Func getChatString($x_start, $y_start, $language) ; -> Get string chat request - Latin Alphabetic - EN "DonateCC.au3"
-	Return getOcrAndCapture($language, $x_start, $y_start, 280, 16)
+	Static $_hHBitmap = 0
+	Local $result
+	$_hHBitmap = GetHHBitmapArea($g_hCurrentDonateButtonBitMap, $x_start, $y_start, $x_start + 280, $y_start + 16)
+	$result = getOcr($_hHBitmap, $language)
+	GdiDeleteHBitmap($_hHBitmap)
+	Return $result
 EndFunc   ;==>getChatString
 
 Func getBuilders($x_start, $y_start) ;  -> Gets Builders number - main screen --> getBuilders(324,23)  coc-profile
@@ -105,15 +110,15 @@ Func getBuilders($x_start, $y_start) ;  -> Gets Builders number - main screen --
 EndFunc   ;==>getBuilders
 
 Func getProfile($x_start, $y_start) ;  -> Gets Attack Win/Defense Win/Donated/Received values - profile screen --> getProfile(160,268)  troops donation
-	Return getOcrAndCapture("coc-profile", $x_start, $y_start, 46, 11, True)
+	Return getOcrAndCapture("coc-profile", $x_start, $y_start, 55, 13, True)
 EndFunc   ;==>getProfile
 
-Func getTroopCountSmall($x_start, $y_start) ;  -> Gets troop amount on Attack Screen for non-selected troop kind
-	Return getOcrAndCapture("coc-t-s", $x_start, $y_start, 53, 15, True)
+Func getTroopCountSmall($x_start, $y_start, $bNeedNewCapture = Default) ;  -> Gets troop amount on Attack Screen for non-selected troop kind
+	Return getOcrAndCapture("coc-t-s", $x_start, $y_start, 53, 15, True, Default, $bNeedNewCapture)
 EndFunc   ;==>getTroopCountSmall
 
-Func getTroopCountBig($x_start, $y_start) ;  -> Gets troop amount on Attack Screen for selected troop kind
-	Return getOcrAndCapture("coc-t-b", $x_start, $y_start, 53, 16, True)
+Func getTroopCountBig($x_start, $y_start, $bNeedNewCapture = Default) ;  -> Gets troop amount on Attack Screen for selected troop kind
+	Return getOcrAndCapture("coc-t-b", $x_start, $y_start, 53, 16, True, Default, $bNeedNewCapture)
 EndFunc   ;==>getTroopCountBig
 
 Func getTroopsSpellsLevel($x_start, $y_start) ;  -> Gets spell level on Attack Screen for selected spell kind (could be used for troops too)
@@ -169,7 +174,13 @@ Func getOcrClanLevel($x_start, $y_start) ;  -> Get the clan level from clan info
 EndFunc   ;==>getOcrClanLevel
 
 Func getOcrSpaceCastleDonate($x_start, $y_start) ;  -> Get the number of troops donated/capacity from a request
-	Return getOcrAndCapture("coc-totalreq", $x_start, $y_start, 45, 12, True)
+	Static $_hHBitmap = 0
+	Local $result
+	$_hHBitmap = GetHHBitmapArea($g_hCurrentDonateButtonBitMap, $x_start, $y_start, $x_start + 45, $y_start + 12)
+	$result = getOcr($_hHBitmap, "coc-totalreq")
+	GdiDeleteHBitmap($_hHBitmap)
+	Return $result
+	;Return getOcrAndCapture("coc-totalreq", $x_start, $y_start, 45, 12, True)
 EndFunc   ;==>getOcrSpaceCastleDonate
 
 Func getOcrDonationTroopsDetection($x_start, $y_start) ;  -> Get the type of troop from the donate window

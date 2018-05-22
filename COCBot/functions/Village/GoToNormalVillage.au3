@@ -15,19 +15,24 @@
 ; ===============================================================================================================================
 
 Func GoToNormalVillage()
-	SetLog("Game is currently on Builder Island! Going back to normal now")
-	ZoomOut(True)
+	SetLog("Game is currently on Builder Island! Going back to Main Village")
 
 	If _Sleep(200) Then Return
 
 	SetLog("Searching for Return Boat on Coast!")
-	Local $aButtonCoords = findButton("ReturnHomeBoat")
-	If IsArray($aButtonCoords) Then
-		SetLog("Returning Home from Builder Island", $COLOR_SUCCESS)
-		ClickP($aButtonCoords)
-		Return True
-	Else
-		SetLog("Cannot find Return Home Boat on Coast!", $COLOR_ERROR)
-		Return False
-	EndIf
+	For $x = 0 to 2
+		Local $aButtonCoords = findButton("ReturnHomeBoat")
+		If IsArray($aButtonCoords) Then
+			SetLog("Returning Home from Builder Island", $COLOR_SUCCESS)
+			ClickP($aButtonCoords)
+			Return True
+		Else
+			If $x = 2 then
+				SetLog("Cannot find Return Home Boat on Coast!", $COLOR_ERROR)
+				Return False
+			EndIf
+			ZoomOut(True)
+		EndIf
+		If _sleep(3000) then Return
+	Next
 EndFunc   ;==>GoToNormalVillage

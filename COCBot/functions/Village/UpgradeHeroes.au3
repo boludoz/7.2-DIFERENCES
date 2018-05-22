@@ -112,7 +112,7 @@ Func QueenUpgrade()
 			SetLog("Bad AQ location", $COLOR_ACTION)
 			Return
 		Else
-			If $sInfo[2] <> "" Then
+			If $sInfo[2] <> "" or $sInfo[2] <> 0 Then
 				$aHeroLevel = Number($sInfo[2]) ; grab hero level from building info array
 				SetLog("Your Queen Level read as: " & $aHeroLevel, $COLOR_SUCCESS)
 				If $aHeroLevel = $g_iMaxQueenLevel Then ; max hero
@@ -121,9 +121,15 @@ Func QueenUpgrade()
 					Return
 				EndIf
 			Else
-				SetLog("Your Queen Level was not found!", $COLOR_INFO)
+				If $sInfo[2] = 0 then SetLog("Your Queen Level was 0!", $COLOR_INFO)
+				If $sInfo[2] = "" then SetLog("Your Queen Level was not found!", $COLOR_INFO)
 				Return
 			EndIf
+		EndIf
+	Else
+		If $aHeroLevel = 0 then
+			SetLog("Queen BuildingInfo Error!", $COLOR_INFO)
+			Return
 		EndIf
 	EndIf
 
@@ -215,7 +221,7 @@ Func KingUpgrade()
 			SetLog("Bad King location", $COLOR_ACTION)
 			Return
 		Else
-			If $sInfo[2] <> "" Then
+			If $sInfo[2] <> "" or $sInfo[2] <> 0 Then ; Zero just in case ....
 				$aHeroLevel = Number($sInfo[2]) ; grab hero level from building info array
 				SetLog("Your King Level read as: " & $aHeroLevel, $COLOR_SUCCESS)
 				If $aHeroLevel = $g_iMaxKingLevel Then ; max hero
@@ -224,9 +230,15 @@ Func KingUpgrade()
 					Return
 				EndIf
 			Else
-				SetLog("Your King Level was not found!", $COLOR_INFO)
+				If $sInfo[2] = 0 then SetLog("Your King Level was 0!", $COLOR_INFO)
+				If $sInfo[2] = "" then SetLog("Your King Level was not found!", $COLOR_INFO)
 				Return
 			EndIf
+		EndIf
+	Else
+		If $aHeroLevel = 0 then
+			SetLog("King BuildingInfo Error!", $COLOR_INFO)
+			Return
 		EndIf
 	EndIf
 
@@ -325,7 +337,7 @@ Func WardenUpgrade()
 			SetLog("Bad Warden location", $COLOR_ACTION)
 			Return
 		Else
-			If $sInfo[2] <> "" Then
+			If $sInfo[2] <> "" or $sInfo[2] <> 0 Then
 				$aHeroLevel = Number($sInfo[2]) ; grab hero level from building info array
 				SetLog("Your Warden Level read as: " & $aHeroLevel, $COLOR_SUCCESS)
 				If $aHeroLevel = $g_iMaxWardenLevel Then ; max hero
@@ -334,9 +346,15 @@ Func WardenUpgrade()
 					Return
 				EndIf
 			Else
-				SetLog("Your Warden Level was not found!", $COLOR_INFO)
+				If $sInfo[2] = 0 then SetLog("Your Warden Level was 0!", $COLOR_INFO)
+				If $sInfo[2] = "" then SetLog("Your Warden Level was not found!", $COLOR_INFO)
 				Return
 			EndIf
+		EndIf
+	Else
+		If $aHeroLevel = 0 then
+			SetLog("Warden BuildingInfo Error!", $COLOR_INFO)
+			Return
 		EndIf
 	EndIf
 

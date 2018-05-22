@@ -36,14 +36,17 @@ Func waitMainScreen() ;Waits for main screen to popup
 			EndIf
 			getBSPos() ; Update $g_hAndroidWindow and Android Window Positions
 		EndIf
-		_CaptureRegion()
-		If _CheckPixel($aIsMain, $g_bNoCapturePixel) = True Then ;Checks for Main Screen
+		;_CaptureRegion2()
+		If _CheckPixel($aIsMain, $g_bCapturePixel) = True Then ;Checks for Main Screen
 			If $g_iDebugSetlog = 1 Then Setlog("Screen cleared, WaitMainScreen exit", $COLOR_DEBUG)
 			Return
 		ElseIf _CheckPixel($aIsDPI125, $g_bNoCapturePixel) = True Then
 			ShowDPIHelp(125)
 		ElseIf _CheckPixel($aIsDPI150, $g_bNoCapturePixel) = True Then
 			ShowDPIHelp(150)
+		ElseIf isOnBuilderIsland(True) Then
+			GoToNormalVillage()
+			Return
 		Else
 			If TestCapture() = False And _Sleep($DELAYWAITMAINSCREEN1) Then Return
 			If checkObstacles() Then $i = 0 ;See if there is anything in the way of mainscreen
@@ -102,8 +105,8 @@ Func waitMainScreenMini()
 		If TestCapture() = False And WinGetAndroidHandle() = 0 Then ExitLoop ; sets @error to 1
 		If $g_iDebugSetlog = 1 Then Setlog("ChkObstl Loop = " & $i & "ExitLoop = " & $iCount, $COLOR_DEBUG) ; Debug stuck loop
 		$iCount += 1
-		_CaptureRegion()
-		If _CheckPixel($aIsMain, $g_bNoCapturePixel) = False Then ;Checks for Main Screen
+		;_CaptureRegion2()
+		If _CheckPixel($aIsMain, $g_bCapturePixel) = False Then ;Checks for Main Screen
 			If TestCapture() = False And _Sleep(1000) Then Return
 			If CheckObstacles() Then $i = 0 ;See if there is anything in the way of mainscreen
 		Else

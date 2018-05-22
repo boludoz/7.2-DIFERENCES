@@ -548,6 +548,8 @@ Func ResetStats()
 	$g_iTotalDonateStatsSpells = 0
 	$g_iTotalDonateStatsSpellsXP = 0
 
+	ResetGoblinsXP()
+
 	UpdateStats()
  EndFunc   ;==>ResetStats
 

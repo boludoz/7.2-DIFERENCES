@@ -114,7 +114,11 @@ Func getArmyHeroCount($bOpenArmyWindow = False, $bCloseArmyWindow = False, $bSet
 
 EndFunc   ;==>getArmyHeroCount
 
-Func ArmyHeroStatus($i)
+#cs
+	Func ArmyHeroStatus($i)
+	;update hero status on gui.. from better method
+	ArmyHeroStatusOld($i)
+
 	Local $sImageDir = "trainwindow-HeroStatus-bundle", $sResult = ""
 	Local Const $aHeroesRect[3][4] = [[660, 349, 673, 361], [734, 349, 747, 361], [807, 349, 822, 361]]
 
@@ -122,22 +126,214 @@ Func ArmyHeroStatus($i)
 	_CaptureRegion2($aHeroesRect[$i][0], $aHeroesRect[$i][1], $aHeroesRect[$i][2], $aHeroesRect[$i][3])
 	Local $res = DllCallMyBot("SearchMultipleTilesBetweenLevels", "handle", $g_hHBitmap2, "str", $sImageDir, "str", "FV", "Int", 0, "str", "FV", "Int", 0, "Int", 1000)
 	If $res[0] <> "" Then
-		Local $aKeys = StringSplit($res[0], "|", $STR_NOCOUNT)
-		If StringInStr($aKeys[0], "xml", $STR_NOCASESENSEBASIC) Then
-			Local $aResult = StringSplit($aKeys[0], "_", $STR_NOCOUNT)
-			$sResult = $aResult[0]
-			Return $sResult
-		EndIf
+	Local $aKeys = StringSplit($res[0], "|", $STR_NOCOUNT)
+	If StringInStr($aKeys[0], "xml", $STR_NOCASESENSEBASIC) Then
+	Local $aResult = StringSplit($aKeys[0], "_", $STR_NOCOUNT)
+	$sResult = $aResult[0]
+	Return $sResult
+	EndIf
 	EndIf
 
-	;return hero if there was a problem with the search
+	;return 'none' if there was a problem with the search , like the hero doesn't exist
 	Switch $i
-		Case 0
-			Return "king"
-		Case 1
-			Return "queen"
-		Case 2
-			Return "warden"
+	Case 0
+	Return "none"
+	Case 1
+	Return "none"
+	Case 2
+	Return "none"
 	EndSwitch
 
+	EndFunc   ;==>ArmyHeroStatus
+#ce
+
+Func ArmyHeroStatus($Hero)
+	;============Notes
+	; Empty is a new return for this function but is changed back to none to make rest of bot happy
+	; none is also a return possable from QuickMIS and is used for a error msg in log before being changed back to royal's name.. ie preserving func old behavior.
+
+	Local $DebugThisFunc = 0
+	Local $directory = @ScriptDir & "\imgxml\Resources\herostatus"
+	Local Const $aHeroesRect[3][4] = [[606, 338, 682, 390], [681, 338, 756, 390], [755, 338, 833, 390]] ; [[643, 340, 683, 390], [718, 340, 758, 390], [749, 340, 833, 390]]
+	Local $Status
+	Select
+		Case $Hero = "King" Or $Hero = 0 Or $Hero = $eKing
+			$Status = QuickMIS("N1", $directory, $aHeroesRect[0][0], $aHeroesRect[0][1], $aHeroesRect[0][2], $aHeroesRect[0][3])
+			If $DebugThisFunc = 1 Then
+				Setlog("return from quickMis for King :" & $Status)
+			EndIf
+			Switch $Status
+				Case "heal" ; Blue
+					GUICtrlSetState($g_hPicKingGray, $GUI_HIDE)
+					GUICtrlSetState($g_hPicKingGreen, $GUI_HIDE)
+					GUICtrlSetState($g_hPicKingRed, $GUI_HIDE)
+					GUICtrlSetState($g_hPicKingBlue, $GUI_SHOW)
+				Case "upgrade" ; Red
+					GUICtrlSetState($g_hPicKingGray, $GUI_HIDE)
+					GUICtrlSetState($g_hPicKingGreen, $GUI_HIDE)
+					GUICtrlSetState($g_hPicKingBlue, $GUI_HIDE)
+					GUICtrlSetState($g_hPicKingRed, $GUI_SHOW)
+				Case "empty" ; Gray
+					GUICtrlSetState($g_hPicKingGreen, $GUI_HIDE)
+					GUICtrlSetState($g_hPicKingRed, $GUI_HIDE)
+					GUICtrlSetState($g_hPicKingBlue, $GUI_HIDE)
+					GUICtrlSetState($g_hPicKingGray, $GUI_SHOW)
+				Case "king" ; Green
+					GUICtrlSetState($g_hPicKingGray, $GUI_HIDE)
+					GUICtrlSetState($g_hPicKingRed, $GUI_HIDE)
+					GUICtrlSetState($g_hPicKingBlue, $GUI_HIDE)
+					GUICtrlSetState($g_hPicKingGreen, $GUI_SHOW)
+			EndSwitch
+
+			If $Status = "" Or $Status = "none" Then
+				Setlog("some kind of error, no image file return, king")
+				$Status = "king"
+			EndIf
+			If $Status = "empty" Then $Status = "none"
+			Return $Status
+
+		Case $Hero = "Queen" Or $Hero = 1 Or $Hero = $eQueen
+			$Status = QuickMIS("N1", $directory, $aHeroesRect[1][0], $aHeroesRect[1][1], $aHeroesRect[1][2], $aHeroesRect[1][3])
+			If $DebugThisFunc = 1 Then
+				Setlog("return from quickMis for Queen :" & $Status)
+			EndIf
+			Switch $Status
+				Case "heal" ; Blue
+					GUICtrlSetState($g_hPicQueenGray, $GUI_HIDE)
+					GUICtrlSetState($g_hPicQueenGreen, $GUI_HIDE)
+					GUICtrlSetState($g_hPicQueenRed, $GUI_HIDE)
+					GUICtrlSetState($g_hPicQueenBlue, $GUI_SHOW)
+				Case "upgrade" ; Red
+					GUICtrlSetState($g_hPicQueenGray, $GUI_HIDE)
+					GUICtrlSetState($g_hPicQueenGreen, $GUI_HIDE)
+					GUICtrlSetState($g_hPicQueenBlue, $GUI_HIDE)
+					GUICtrlSetState($g_hPicQueenRed, $GUI_SHOW)
+				Case "empty" ; Gray
+					GUICtrlSetState($g_hPicQueenGreen, $GUI_HIDE)
+					GUICtrlSetState($g_hPicQueenRed, $GUI_HIDE)
+					GUICtrlSetState($g_hPicQueenBlue, $GUI_HIDE)
+					GUICtrlSetState($g_hPicQueenGray, $GUI_SHOW)
+				Case "queen" ; Green
+					GUICtrlSetState($g_hPicQueenGray, $GUI_HIDE)
+					GUICtrlSetState($g_hPicQueenRed, $GUI_HIDE)
+					GUICtrlSetState($g_hPicQueenBlue, $GUI_HIDE)
+					GUICtrlSetState($g_hPicQueenGreen, $GUI_SHOW)
+			EndSwitch
+			If $Status = "" Or $Status = "none" Then
+				Setlog("some kind of error, no image file return, queen")
+				$Status = "queen"
+			EndIf
+			If $Status = "empty" Then $Status = "none"
+			Return $Status
+
+		Case $Hero = "Warden" Or $Hero = 2 Or $Hero = $eWarden
+			;$Result = SearchArmy($directory, $aHeroesRect[2][0], $aHeroesRect[2][1], $aHeroesRect[2][2], $aHeroesRect[2][3], "", True)
+			$Status = QuickMIS("N1", $directory, $aHeroesRect[2][0], $aHeroesRect[2][1], $aHeroesRect[2][2], $aHeroesRect[2][3])
+			If $DebugThisFunc = 1 Then
+				Setlog("return from quickMis for Warden :" & $Status)
+			EndIf
+			Switch $Status
+				Case "heal" ; Blue
+					GUICtrlSetState($g_hPicWardenGray, $GUI_HIDE)
+					GUICtrlSetState($g_hPicWardenGreen, $GUI_HIDE)
+					GUICtrlSetState($g_hPicWardenRed, $GUI_HIDE)
+					GUICtrlSetState($g_hPicWardenBlue, $GUI_SHOW)
+				Case "upgrade" ; Red
+					GUICtrlSetState($g_hPicWardenGray, $GUI_HIDE)
+					GUICtrlSetState($g_hPicWardenGreen, $GUI_HIDE)
+					GUICtrlSetState($g_hPicWardenBlue, $GUI_HIDE)
+					GUICtrlSetState($g_hPicWardenRed, $GUI_SHOW)
+				Case "empty" ; Gray
+					GUICtrlSetState($g_hPicWardenGreen, $GUI_HIDE)
+					GUICtrlSetState($g_hPicWardenRed, $GUI_HIDE)
+					GUICtrlSetState($g_hPicWardenBlue, $GUI_HIDE)
+					GUICtrlSetState($g_hPicWardenGray, $GUI_SHOW)
+				Case "warden" ; Green
+					GUICtrlSetState($g_hPicWardenGray, $GUI_HIDE)
+					GUICtrlSetState($g_hPicWardenRed, $GUI_HIDE)
+					GUICtrlSetState($g_hPicWardenBlue, $GUI_HIDE)
+					GUICtrlSetState($g_hPicWardenGreen, $GUI_SHOW)
+			EndSwitch
+			If $Status = "" Or $Status = "none" Then
+				Setlog("some kind of error, no image file return, warden")
+				$Status = "warden"
+			EndIf
+			If $Status = "empty" Then $Status = "none"
+			Return $Status
+	EndSelect
 EndFunc   ;==>ArmyHeroStatus
+
+Func LabGuiDisplay() ; called from main loop to get an early status for indictors in bot bottom
+
+	;CLOSE ARMY WINDOW
+	ClickP($aAway, 2, 0, "#0346") ;Click Away
+	If _Sleep(1500) Then Return ; Delay AFTER the click Away Prevents lots of coc restarts
+
+	;=================Section 2 Lab Gui
+
+	; If $g_bAutoLabUpgradeEnable = True Then  ====>>>> TODO : or use this or make a checkbox on GUI
+	; make sure lab is located, if not locate lab
+	If $g_aiLaboratoryPos[0] <= 0 Or $g_aiLaboratoryPos[1] <= 0 Then
+		SetLog("Laboratory Location not found!", $COLOR_ERROR)
+		LocateLab() ; Lab location unknown, so find it.
+		If $g_aiLaboratoryPos[0] = 0 Or $g_aiLaboratoryPos[1] = 0 Then
+			SetLog("Problem locating Laboratory, train laboratory position before proceeding", $COLOR_ERROR)
+			;============Hide Red  Hide Green  Show Gray==
+			GUICtrlSetState($g_hPicLabGreen, $GUI_HIDE)
+			GUICtrlSetState($g_hPicLabRed, $GUI_HIDE)
+			GUICtrlSetState($g_hPicLabGray, $GUI_SHOW)
+			;============================================
+			Return
+		EndIf
+	EndIf
+	BuildingClickP($g_aiLaboratoryPos, "#0197") ;Click Laboratory
+	If _Sleep($DELAYLABORATORY1) Then Return ; Wait for window to open
+	; Find Research Button
+
+	If QuickMIS("BC1", @ScriptDir & "\imgxml\Resources\herostatus\lab button", 400, 610, 600, 710) Then
+		Click($g_iQuickMISX + 400, $g_iQuickMISY + 610)
+		If _Sleep($DELAYLABORATORY1) Then Return ; Wait for window to open
+	Else
+		Setlog("Trouble finding research button, try again...", $COLOR_WARNING)
+		ClickP($aAway, 2, $DELAYLABORATORY4, "#0199")
+		;===========Hide Red  Hide Green  Show Gray==
+		GUICtrlSetState($g_hPicLabGreen, $GUI_HIDE)
+		GUICtrlSetState($g_hPicLabRed, $GUI_HIDE)
+		GUICtrlSetState($g_hPicLabGray, $GUI_SHOW)
+		;===========================================
+		Return
+	EndIf
+
+	; check for upgrade in process - look for green in finish upgrade with gems button
+	If _ColorCheck(_GetPixelColor(730, 200, True), Hex(0xA2CB6C, 6), 20) Then ; Look for light green in upper right corner of lab window.
+		SetLog("Laboratory is Running. ", $COLOR_INFO)
+		;==========Hide Red  Show Green Hide Gray===
+		GUICtrlSetState($g_hPicLabGray, $GUI_HIDE)
+		GUICtrlSetState($g_hPicLabRed, $GUI_HIDE)
+		GUICtrlSetState($g_hPicLabGreen, $GUI_SHOW)
+		;===========================================
+		If _Sleep($DELAYLABORATORY2) Then Return
+		ClickP($aAway, 2, $DELAYLABORATORY4, "#0359")
+		Return True
+	ElseIf _ColorCheck(_GetPixelColor(730, 200, True), Hex(0x8088B0, 6), 20) Then ; Look for light purple in upper right corner of lab window.
+		SetLog("Laboratory has Stopped", $COLOR_INFO)
+		ClickP($aAway, 2, $DELAYLABORATORY4, "#0359")
+		;========Show Red  Hide Green  Hide Gray=====
+		GUICtrlSetState($g_hPicLabGray, $GUI_HIDE)
+		GUICtrlSetState($g_hPicLabGreen, $GUI_HIDE)
+		GUICtrlSetState($g_hPicLabRed, $GUI_SHOW)
+		;============================================
+		ClickP($aAway, 2, $DELAYLABORATORY4, "#0359")
+		Return
+	Else
+		SetLog("Unable to determine Lab Status", $COLOR_INFO)
+		ClickP($aAway, 2, $DELAYLABORATORY4, "#0359")
+		;========Hide Red  Hide Green  Show Gray======
+		GUICtrlSetState($g_hPicLabGreen, $GUI_HIDE)
+		GUICtrlSetState($g_hPicLabRed, $GUI_HIDE)
+		GUICtrlSetState($g_hPicLabGray, $GUI_SHOW)
+		;=============================================
+		Return
+	EndIf
+	; EndIf
+EndFunc   ;==>LabGuiDisplay

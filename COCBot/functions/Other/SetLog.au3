@@ -275,8 +275,12 @@ EndFunc   ;==>SetAtkLog
 
 Func AtkLogHead()
 	SetAtkLog(_PadStringCenter(" " & GetTranslatedFileIni("MBR Func_AtkLogHead", "AtkLogHead_Text_01", "ATTACK LOG") & " ", 71, "="), "", $COLOR_BLACK, "MS Shell Dlg", 8.5)
-	SetAtkLog(GetTranslatedFileIni("MBR Func_AtkLogHead", "AtkLogHead_Text_02", '|                  --------  LOOT --------       ----- BONUS ------'), "")
-	SetAtkLog(GetTranslatedFileIni("MBR Func_AtkLogHead", "AtkLogHead_Text_03", '|TIME|TROP.|SEARCH|   GOLD| ELIXIR|DARK EL|TR.|S|  GOLD|ELIXIR|  DE|L.'), "")
+; ================================================== ADDITION BY ROROTITI - PICO MOD ================================================== ;
+;	SetAtkLog(GetTranslatedFileIni("MBR Func_AtkLogHead", "AtkLogHead_Text_02", '|                  --------  LOOT --------       ----- BONUS ------'), "")
+;	SetAtkLog(GetTranslatedFileIni("MBR Func_AtkLogHead", "AtkLogHead_Text_03", '| TIME|TROP.|SEARCH|   GOLD| ELIXIR|DARK EL|TR.|S|  GOLD|ELIXIR|  DE|L.'), "")
+	SetAtkLog("SW" & GetTranslatedFileIni("MBR Func_AtkLogHead", "AtkLogHead_Text_02", '|                   --------  LOOT --------       ----- BONUS ------'), "")
+	SetAtkLog("AC" & GetTranslatedFileIni("MBR Func_AtkLogHead", "AtkLogHead_Text_03", '| TIME|TROP.|SEARCH|   GOLD| ELIXIR|DARK EL|TR.|S|  GOLD|ELIXIR|  DE|L.'), "")
+; ================================================== ADDITION BY ROROTITI - PICO MOD ================================================== ;
 EndFunc   ;==>AtkLogHead
 
 Func __FileWriteLog($handle, $text)

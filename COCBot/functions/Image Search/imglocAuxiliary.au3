@@ -224,7 +224,8 @@ Func GetButtonDiamond($sButtonName)
 			$btnDiamond = "282,85|306,85|306,130|282,130"
 		Case "DownDonation" ;mainwindow - only when chat window is visible
 			$btnDiamond = "282,635|306,635|306,680|282,680"
-
+		case "ReturnHomeBoat"
+			$btnDiamond = "450,93|736,93|736,260|450,260" ; Builder Base window
 		Case Else
 			$btnDiamond = "FV" ; use full image to locate button
 	EndSwitch

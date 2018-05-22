@@ -15,6 +15,7 @@
 ; Example .......: No
 ; ===============================================================================================================================
 ;
+Global $g_hTrainTimeLeft = 0 ; TimerHandle New Used in Donate/Train only Mode - Ezeck 6-14-17
 Func getArmyTroopTime($bOpenArmyWindow = False, $bCloseArmyWindow = False, $bSetLog = True, $CheckWindow = True)
 
 	If $g_iDebugSetlogTrain = 1 Or $g_iDebugSetlog = 1 Then SetLog("Begin getArmyTroopTime:", $COLOR_DEBUG1)
@@ -34,9 +35,27 @@ Func getArmyTroopTime($bOpenArmyWindow = False, $bCloseArmyWindow = False, $bSet
 		EndIf
 	EndIf
 
+	; Verify is the Barracks is Boosted
+	Local $bBoosted = False
+	If QuickMIS("BC1", @ScriptDir & "\imgxml\Resources\Boosted", 690, 155, 750, 190) Then ; search for treasury button
+		$bBoosted = True
+	Endif
 
 	Local $sResultTroops = getRemainTrainTimer(756, 169) ;Get time via OCR.
-	$g_aiTimeTrain[0] = ConvertOCRTime("Troops", $sResultTroops, $bSetLog) ; update global array
+	$g_aiTimeTrain[0] = ConvertOCRTime("Troops", $sResultTroops, $bSetLog) ; update global array ;value is in min's
+
+	If $bBoosted then
+		;$g_aiTimeTrain[0] = $g_aiTimeTrain[0] / 4
+		Setlog("Boosted Barracks detected!", $COLOR_INFO)
+	EndIf
+
+;==================================================
+	; Used in Donate/Train only Mode - Ezeck 6-14-17
+	; Set the Timer to be used in train donate only, durring the donate cycle
+		If ($g_iCommandStop = 3 Or $g_iCommandStop = 0) Then
+			$g_hTrainTimeLeft = TimerInit()
+		EndIf
+;==================================================
 
 	If $bCloseArmyWindow Then
 		ClickP($aAway, 1, 0, "#0000") ;Click Away

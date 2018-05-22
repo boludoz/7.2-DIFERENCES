@@ -30,6 +30,15 @@ Func setupProfileComboBox()
 	GUICtrlSetData($g_hCmbProfile, "", "")
 	; Set the new data of available profiles
 	GUICtrlSetData($g_hCmbProfile, $profileString, "<No Profiles>")
+
+; ================================================== ADDITION BY ROROTITI - PICO MOD ================================================== ;
+	For $x = 1 To 8
+		GUICtrlSetData($g_acmbAccount[$x], "", "")
+		GUICtrlSetData($g_acmbAccount[$x], $profileString, "<No Profiles>")
+		_GUICtrlComboBox_SetCurSel($g_acmbAccount[$x], 0)
+	Next
+; ================================================== ADDITION BY ROROTITI - PICO MOD ================================================== ;
+
 EndFunc   ;==>setupProfileComboBox
 
 Func renameProfile()

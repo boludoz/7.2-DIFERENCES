@@ -50,7 +50,7 @@ Func TrainRevamp()
 		If $g_bIsFullArmywithHeroesAndSpells Then Setlog(" - Your Army is Full, let's make troops before Attack!", $COLOR_BLUE)
 		If ($g_CurrentCampUtilization = 0 And $g_bFirstStart) Then
 			Setlog(" - Your Army is Empty, let's make troops before Attack!", $COLOR_ACTION1)
-			Setlog(" - Go to TrainRevamp Tab and select your Quick Army position!", $COLOR_ACTION1)
+			Setlog(" - Go to Train Army Tab and select your Quick Army position!", $COLOR_ACTION1)
 		EndIf
 
 		DeleteQueued("Troops")
@@ -71,8 +71,10 @@ Func TrainRevamp()
 
 		CheckIsFullQueuedAndNotFullArmy()
 		If Not $g_bRunState Then Return
+		If _Sleep($DELAYRESPOND) Then Return
 		CheckIsEmptyQueuedAndNotFullArmy()
 		If Not $g_bRunState Then Return
+		If _Sleep($DELAYRESPOND) Then Return
 		If $g_bFirstStart Then $g_bFirstStart = False
 	EndIf
 
@@ -167,6 +169,7 @@ Func TrainRevampOldStyle()
 		$rWhatToTrain = WhatToTrain(False, False)
 		TrainUsingWhatToTrain($rWhatToTrain)
 	EndIf
+	If _Sleep($DELAYRESPOND) Then Return
 
 	If IsQueueEmpty($TrainTroopsTAB) Then
 		If Not $g_bRunState Then Return
@@ -178,6 +181,7 @@ Func TrainRevampOldStyle()
 		If Not $g_bRunState Then Return
 		If Not IsArmyWindow(False, $ArmyTAB) Then OpenTrainTabNumber($ArmyTAB, "TrainRevampOldStyle()")
 	EndIf
+	If _Sleep($DELAYRESPOND) Then Return
 
 	$rWhatToTrain = WhatToTrain(False, False)
 	If DoWhatToTrainContainSpell($rWhatToTrain) Then
@@ -211,7 +215,7 @@ Func CheckIfArmyIsReady()
 	If IsArmyWindow(False, $ArmyTAB) = False Then OpenTrainTabNumber($ArmyTAB, "CheckIfArmyIsReady()")
 	If _Sleep(250) Then Return
 
-	CheckArmyCamp(False, False, False, False)
+	CheckArmyCamp(False, False, False, True)
 
 	If $g_iDebugSetlogTrain = 1 Then
 		Setlog(" - $g_CurrentCampUtilization : " & $g_CurrentCampUtilization)
@@ -229,7 +233,9 @@ Func CheckIfArmyIsReady()
 	EndIf
 
 	$g_bCheckSpells = CheckSpells()
-	$bFullArmyHero = BitAND($g_aiSearchHeroWaitEnable[$DB], $g_iHeroAvailable) > 0 Or BitAND($g_aiSearchHeroWaitEnable[$LB], $g_iHeroAvailable) > 0 Or ($g_aiSearchHeroWaitEnable[$DB] = $eHeroNone And $g_aiSearchHeroWaitEnable[$LB] = $eHeroNone)
+	$bFullArmyHero = BitAND($g_aiSearchHeroWaitEnable[$DB], $g_iHeroAvailable) > 0 Or _
+			BitAND($g_aiSearchHeroWaitEnable[$LB], $g_iHeroAvailable) > 0 Or _
+			((IsSearchModeActive($DB) And $g_aiSearchHeroWaitEnable[$DB] = $eHeroNone) Or (IsSearchModeActive($LB) And $g_aiSearchHeroWaitEnable[$LB] = $eHeroNone))
 	$bFullArmyCCSpells = IsFullClanCastleSpells()
 	$bFullArmyCCTroops = IsFullClanCastleTroops()
 
@@ -278,6 +284,9 @@ Func CheckIfArmyIsReady()
 		If $sLogText <> "" Then Setlog(" -" & $sLogText & " are not Ready!", $COLOR_ACTION)
 	EndIf
 
+	; Force to Request CC troops or Spells
+	If Not $bFullArmyCCTroops Or Not $bFullArmyCCSpells Then $g_bCanRequestCC = True
+
 	If $g_iDebugSetlog = 1 Then
 		SetLog(" $g_bFullArmy: " & String($g_bFullArmy), $COLOR_DEBUG)
 		SetLog(" $bCheckCCTroops: " & String($bFullArmyCCTroops), $COLOR_DEBUG)
@@ -324,6 +333,11 @@ EndFunc   ;==>IsFullClanCastleTroops
 
 Func IsFullClanCastleSpells($bReturnOnly = False)
 
+	; Just in case ... If the tab is disable will update the variable
+	For $i = 0 To $g_iModeCount - 1
+		If Not $g_abAttackTypeEnable[$i] Then $g_abSearchCastleSpellsWaitEnable[$i] = False
+	Next
+
 	Local $sCurCCSpell1 = "", $sCurCCSpell2 = "", $aShouldRemove[2] = [0, 0], $rColCheckFullCCTroops = False
 	Local $bCCSpellFull = False
 	Local $ToReturn = False
@@ -339,8 +353,11 @@ Func IsFullClanCastleSpells($bReturnOnly = False)
 
 	If $g_iCurrentCCSpell = $g_iTotalCCSpell Then $bCCSpellFull = True
 
-	If $bCCSpellFull And (($g_abAttackTypeEnable[$DB] And $g_abSearchCastleSpellsWaitEnable[$DB]) Or ($g_abAttackTypeEnable[$LB] And $g_abSearchCastleSpellsWaitEnable[$LB])) Then
-		If $g_iDebugSetlogTrain Then Setlog("Getting current available spell in Clan Castle.")
+	If $bCCSpellFull And ($g_abSearchCastleSpellsWaitEnable[$DB] Or $g_abSearchCastleSpellsWaitEnable[$LB]) Then
+		Local $Text = ""
+		If $g_abSearchCastleSpellsWaitEnable[$DB] Then $Text += "DB"
+		If $g_abSearchCastleSpellsWaitEnable[$LB] Then $Text += "LB"
+		If $g_iDebugSetlogTrain Then Setlog("[" & $Text & "] Getting current available spell in Clan Castle.")
 		; Imgloc Detection
 		If $g_iTotalCCSpell >= 1 Then $sCurCCSpell1 = GetCurCCSpell(1)
 		If $g_iTotalCCSpell >= 2 Then $sCurCCSpell2 = GetCurCCSpell(2)
@@ -390,7 +407,7 @@ Func IsFullClanCastleSpells($bReturnOnly = False)
 			$ToReturn = True
 		EndIf
 
-	ElseIf Not $bCCSpellFull And (($g_abAttackTypeEnable[$DB] And $g_abSearchCastleSpellsWaitEnable[$DB]) Or ($g_abAttackTypeEnable[$LB] And $g_abSearchCastleSpellsWaitEnable[$LB])) Then
+	ElseIf Not $bCCSpellFull And ($g_abSearchCastleSpellsWaitEnable[$DB] Or $g_abSearchCastleSpellsWaitEnable[$LB]) Then
 
 		$g_bCanRequestCC = _ColorCheck(_GetPixelColor($aRequestTroopsAO[0], $aRequestTroopsAO[1], True), Hex($aRequestTroopsAO[2], 6), $aRequestTroopsAO[5])
 		If $g_bCanRequestCC Then
@@ -602,12 +619,13 @@ EndFunc   ;==>CompareCCSpellWithGUI
 Func GetCurCCSpell($iSpellSlot = 1)
 	If Not $g_bRunState Then Return
 	Local $directory = @ScriptDir & "\imgxml\ArmySpells"
-	Local $x1 = 508, $x2 = 587, $y1 = 500, $y2 = 570
+	; 508 and 615 ( sometimes the spell stays on the middle )
+	Local $x1 = 508, $x2 = 615, $y1 = 500, $y2 = 570
 
 	If $iSpellSlot = 1 Then
 		;Nothing
 	ElseIf $iSpellSlot = 2 Then
-		$x1 = 587
+		$x1 = 600
 		$x2 = 660
 	Else
 		If $g_iDebugSetlog = 1 Then SetLog("GetCurCCSpell() called with the wrong argument!", $COLOR_ERROR)
@@ -697,6 +715,7 @@ Func TrainUsingWhatToTrain($rWTT, $bSpellsOnly = False)
 						EndIf
 					EndIf
 				EndIf
+				If _Sleep($DELAYRESPOND) Then Return
 			Next
 		Case True
 			For $i = 0 To (UBound($rWTT) - 1)
@@ -756,6 +775,7 @@ Func TrainUsingWhatToTrain($rWTT, $bSpellsOnly = False)
 						EndIf
 					EndIf
 				EndIf
+				If _Sleep($DELAYRESPOND) Then Return
 			Next
 	EndSwitch
 
@@ -834,6 +854,7 @@ Func HowManyTimesWillBeUsed($Spell) ;ONLY ONLY ONLY FOR SPELLS, TO SEE IF NEEDED
 		If $g_aiAttackAlgorithm[$DB] = 1 Then ; Scripted Attack is Selected
 			If IsGUICheckedForSpell($Spell, $DB) Then
 				$ToReturn = CountCommandsForSpell($Spell, $DB)
+				If $g_iDebugSetlogTrain Then Setlog("IsGUICheckedForSpell[" & $Spell & ", DB]", $COLOR_DEBUG)
 				If $ToReturn = 0 Then $ToReturn = -1
 			Else ; Spell not selected to be used in GUI so bot will not use Spell
 				$ToReturn = -1
@@ -847,6 +868,7 @@ Func HowManyTimesWillBeUsed($Spell) ;ONLY ONLY ONLY FOR SPELLS, TO SEE IF NEEDED
 	If $g_abAttackTypeEnable[$LB] Then
 		If $g_aiAttackAlgorithm[$LB] = 1 Then ; Scripted Attack is Selected
 			If IsGUICheckedForSpell($Spell, $LB) Then
+				If $g_iDebugSetlogTrain Then Setlog("IsGUICheckedForSpell[" & $Spell & ", LB]", $COLOR_DEBUG)
 				$ToReturn = CountCommandsForSpell($Spell, $LB)
 				If $ToReturn = 0 Then $ToReturn = -1
 			EndIf
@@ -857,6 +879,7 @@ Func HowManyTimesWillBeUsed($Spell) ;ONLY ONLY ONLY FOR SPELLS, TO SEE IF NEEDED
 EndFunc   ;==>HowManyTimesWillBeUsed
 
 Func CountCommandsForSpell($Spell, $Mode)
+	If $g_iDebugSetlogTrain Then Setlog("CSV|CountCommandsForSpell [" & $Spell & "] starting ", $COLOR_DEBUG)
 	Local $ToReturn = 0
 	Local $filename = ""
 	If $g_bRunState = False Then Return
@@ -869,7 +892,7 @@ Func CountCommandsForSpell($Spell, $Mode)
 	Local $rownum = 0
 	If FileExists($g_sCSVAttacksPath & "\" & $filename & ".csv") Then
 		Local $f, $line, $acommand, $command
-		Local $value1, $Troop
+		Local $value1, $SpellName, $quant
 		$f = FileOpen($g_sCSVAttacksPath & "\" & $filename & ".csv", 0)
 		; Read in lines of text until the EOF is reached
 		While 1
@@ -879,10 +902,12 @@ Func CountCommandsForSpell($Spell, $Mode)
 			$acommand = StringSplit($line, "|")
 			If $acommand[0] >= 8 Then
 				$command = StringStripWS(StringUpper($acommand[1]), 2)
-				$Troop = StringStripWS(StringUpper($acommand[5]), 2)
-				If $Troop = $Spell Then $ToReturn += 1
+				$SpellName = StringStripWS(StringUpper($acommand[5]), 2)
+				$quant = Number(StringStripWS(StringUpper($acommand[4]), 2))
+				If $SpellName = $Spell Then $ToReturn += $quant
 			EndIf
 		WEnd
+		If $ToReturn > 0 And $g_iDebugSetlogTrain Then Setlog("CSV|Spell [" & $Spell & "] detected " & $ToReturn & "x", $COLOR_INFO)
 		FileClose($f)
 	Else
 		$ToReturn = 0
@@ -911,6 +936,9 @@ Func IsGUICheckedForSpell($Spell, $Mode)
 		Case $eFSpell
 			$sSpell = "Freeze"
 			$aVal = $g_abAttackUseFreezeSpell
+		Case $eCSpell
+			$sSpell = "Clone"
+			$aVal = $g_abAttackUseCloneSpell
 		Case $ePSpell
 			$sSpell = "Poison"
 			$aVal = $g_abAttackUsePoisonSpell
@@ -1372,6 +1400,7 @@ Func WhatToTrain($ReturnExtraTroopsOnly = False, $bSetLog = True)
 			If $g_bRunState = False Then Return
 			If TotalSpellsToBrewInGUI() = 0 Then ExitLoop
 			If $g_aiArmyCompSpells[$BrewIndex] > 0 Then
+				If $g_iDebugSetlogTrain Then Setlog("$g_asSpellShortNames[" & $BrewIndex & "]: " & $g_asSpellShortNames[$BrewIndex])
 				If HowManyTimesWillBeUsed($g_asSpellShortNames[$BrewIndex]) > 0 Then
 					$ToReturn[UBound($ToReturn) - 1][0] = $g_asSpellShortNames[$BrewIndex]
 					$ToReturn[UBound($ToReturn) - 1][1] = $g_aiArmyCompSpells[$BrewIndex]
@@ -1555,10 +1584,10 @@ Func IsArmyWindow($bSetLog = False, $iTabNumber = 0)
 	If _CheckPixel($aIsTrainPgChk1, True) Then
 		While $i < 1
 			If Not $g_bRunState Then Return
-			if $g_iDebugSetlogTrain then Setlog("$CheckIT[0]: " & $CheckIT[0])
-			if $g_iDebugSetlogTrain then Setlog("$CheckIT[1]: " & $CheckIT[1])
-			if $g_iDebugSetlogTrain then Setlog("$CheckIT[2]: " & Hex($CheckIT[2], 6))
-			if $g_iDebugSetlogTrain then Setlog("$CheckIT[3]: " & $CheckIT[3])
+			If $g_iDebugSetlogTrain Then Setlog("$CheckIT[0]: " & $CheckIT[0])
+			If $g_iDebugSetlogTrain Then Setlog("$CheckIT[1]: " & $CheckIT[1])
+			If $g_iDebugSetlogTrain Then Setlog("$CheckIT[2]: " & Hex($CheckIT[2], 6))
+			If $g_iDebugSetlogTrain Then Setlog("$CheckIT[3]: " & $CheckIT[3])
 			If _ColorCheck(_GetPixelColor($CheckIT[0], $CheckIT[1], True), Hex($CheckIT[2], 6), $CheckIT[3]) Then ExitLoop
 
 			If _Sleep($DELAYISTRAINPAGE2) Then ExitLoop
@@ -1573,7 +1602,7 @@ Func IsArmyWindow($bSetLog = False, $iTabNumber = 0)
 		If ($g_iDebugSetlog = 1 Or $g_iDebugClick = 1) Or $bSetLog Or $g_iDebugSetlogTrain Then Setlog("**" & $txt & " OK**", $COLOR_DEBUG) ;Debug
 		Return True
 	Else
-		If $bSetLog Or $g_iDebugSetlogTrain Then SetLog("Cannot find " & $txt & " | TAB " & $iTabNumber, $COLOR_ERROR) ; in case of $i > 10 in while loop
+		If $bSetLog Or $g_iDebugSetlogTrain Then SetLog("You are not in " & $txt & " | TAB " & $iTabNumber, $COLOR_ERROR) ; in case of $i > 10 in while loop
 		If $g_iDebugImageSave = 1 Then DebugImageSave("IsTrainPage")
 		Return False
 	EndIf
@@ -2057,6 +2086,7 @@ Func MakingDonatedTroops()
 						;PureClick($pos[0], $pos[1], $howMuch, 500)
 						ClickDrag(220, 445 + $g_iMidOffsetY, 725, 445 + $g_iMidOffsetY, 2000) ; Click drag for Elixer Troops
 					EndIf
+					If _Sleep($DELAYRESPOND) Then Return
 					Local $sTroopName = ($avDefaultTroopGroup[$i][4] > 1 ? $g_asTroopNamesPlural[$iTroopIndex] : $g_asTroopNames[$iTroopIndex])
 					Setlog(" - Trained " & $avDefaultTroopGroup[$i][4] & " " & $sTroopName, $COLOR_ACTION)
 					$avDefaultTroopGroup[$i][4] = 0
@@ -2084,6 +2114,7 @@ Func MakingDonatedTroops()
 								;PureClick($pos[0], $pos[1], $howMuch, 500)
 								ClickDrag(220, 445 + $g_iMidOffsetY, 725, 445 + $g_iMidOffsetY, 2000) ; Click drag for Elixer Troops
 							EndIf
+							If _Sleep($DELAYRESPOND) Then Return
 							Local $sTroopName = ($avDefaultTroopGroup[$i][4] > 1 ? $g_asTroopNamesPlural[$iTroopIndex] : $g_asTroopNames[$iTroopIndex])
 							Setlog(" - Trained " & $avDefaultTroopGroup[$i][4] & " " & $sTroopName, $COLOR_ACTION)
 							$avDefaultTroopGroup[$i][4] -= 1
@@ -2124,6 +2155,7 @@ Func MakingDonatedTroops()
 				Local $howMuch = $g_aiDonateSpells[$i]
 				TrainIt($eLSpell + $i, $howMuch, $g_iTrainClickDelay)
 				;PureClick($pos[0], $pos[1], $howMuch, 500)
+				If _Sleep($DELAYRESPOND) Then Return
 				Setlog(" - Brewed " & $howMuch & " " & $g_asSpellNames[$i] & ($howMuch > 1 ? " Spells" : " Spell"), $COLOR_ACTION)
 				$g_aiDonateTroops[$i] -= $howMuch
 			EndIf
@@ -2146,6 +2178,17 @@ Func GetOCRCurrent($x_start, $y_start)
 		Local $aTempResult = StringSplit($iOCRResult, "#", $STR_NOCOUNT)
 		$aResult[0] = Number($aTempResult[0])
 		$aResult[1] = Number($aTempResult[1])
+		; Case to use this function os Spells will be <= 22 , 11*2
+		If $aResult[1] <= 22 Then
+			If $g_iDebugSetlogTrain Then Setlog("$g_iTotalSpellValue: " & $g_iTotalSpellValue, $COLOR_DEBUG)
+			$aResult[1] = $g_iTotalSpellValue
+			$aResult[2] = $g_iTotalSpellValue - $aResult[0]
+			; May 2017 Update the Army Camp Value on Train page is DOUBLE Value
+		ElseIf $aResult[1] <> $g_iTotalCampSpace Then
+			If $g_iDebugSetlogTrain Then Setlog("$g_iTotalCampSpace: " & $g_iTotalCampSpace, $COLOR_DEBUG)
+			$aResult[1] = $g_iTotalCampSpace
+			$aResult[2] = $g_iTotalCampSpace - $aResult[0]
+		EndIf
 		$aResult[2] = $aResult[1] - $aResult[0]
 	Else
 		Setlog("DEBUG | ERROR on GetOCRCurrent", $COLOR_ERROR)
@@ -2253,16 +2296,16 @@ Func IIf($Condition, $IfTrue, $IfFalse)
 	EndIf
 EndFunc   ;==>IIf
 
-Func _ArryRemoveBlanks(ByRef $aArray)
-	Local $iCounter = 0
-	For $i = 0 To UBound($aArray) - 1
-		If $aArray[$i] <> "" Then
-			$aArray[$iCounter] = $aArray[$i]
-			$iCounter += 1
-		EndIf
-	Next
-	ReDim $aArray[$iCounter]
-EndFunc   ;==>_ArryRemoveBlanks
+;Func _ArryRemoveBlanks(ByRef $aArray)
+;	Local $iCounter = 0
+;	For $i = 0 To UBound($aArray) - 1
+;		If $aArray[$i] <> "" Then
+;			$aArray[$iCounter] = $aArray[$i]
+;			$iCounter += 1
+;		EndIf
+;	Next
+;	ReDim $aArray[$iCounter]
+;EndFunc   ;==>_ArryRemoveBlanks
 
 Func ValidateSearchArmyResult($aSearchResult, $iIndex = 0)
 	If IsArray($aSearchResult) Then

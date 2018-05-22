@@ -27,6 +27,15 @@
 
 Func GetVillageSize($DebugLog = False, $sStonePrefix = Default, $sTreePrefix = "tree")
 
+	If isOnBuilderIsland(True) Then
+		If GoToNormalVillage() then
+			If _sleep(2000) then return
+		Else
+			Setlog("Issue on GoToNormalVillage!!!", $COLOR_WARNING)
+			Return
+		EndIf
+	EndIf
+
 	If $sStonePrefix = Default Then $sStonePrefix = "stone"
 	If $sTreePrefix = Default Then $sTreePrefix = "tree"
 

@@ -84,19 +84,11 @@ Func chkBotAutoSlideClick()
 EndFunc   ;==>chkBotAutoSlideClick
 
 Func chkUseRandomClick()
-	;$g_bUseRandomClick = (GUICtrlRead($g_hChkUseRandomClick) = $GUI_CHECKED)
-	$g_bRunState = True
-	Local $ArmyCamp = GetOCRCurrent(48, 160)
-	_CaptureRegion2(48,160,115, 174)
-	DebugImageSave("hi", False)
-	_ArrayDisplay($ArmyCamp)
-	$g_bRunState = False
+
+	$g_bUseRandomClick = (GUICtrlRead($g_hChkUseRandomClick) = $GUI_CHECKED)
+
 EndFunc   ;==>chkUseRandomClick
-#cs
-	Func chkUpdatingWhenMinimized()
-	$g_bUpdatingWhenMinimized = (GUICtrlRead($g_hChkUpdatingWhenMinimized) = $GUI_CHECKED)
-	EndFunc   ;==>chkUpdatingWhenMinimized
-#ce
+
 Func chkHideWhenMinimized()
 	$g_bHideWhenMinimized = (GUICtrlRead($g_hChkHideWhenMinimized) = $GUI_CHECKED)
 	TrayItemSetState($g_hTiHide, ($g_bHideWhenMinimized = 1 ? $TRAY_CHECKED : $TRAY_UNCHECKED))
